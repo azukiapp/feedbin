@@ -1,17 +1,13 @@
-development:
+development: &database
   adapter: postgresql
   encoding: unicode
-  database: feedbin_development
+  database: <%= ENV['POSTGRES_DATABASE'] %>
   pool: 19
   username: <%= ENV['POSTGRES_USERNAME'] %>
-  password:
-  host: localhost
+  password: <%= ENV['POSTGRES_PASSWORD'] %>
+  host: <%= ENV['POSTGRES_HOST'] %>
+  port: <%= ENV['POSTGRES_PORT'] %>
 
 test:
-  adapter: postgresql
-  encoding: unicode
+  <<: *database
   database: feedbin_test
-  pool: 19
-  username: <%= ENV['POSTGRES_USERNAME'] %>
-  password:
-  host: localhost

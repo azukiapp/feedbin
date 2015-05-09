@@ -20,3 +20,5 @@
 .env
 .env-tmp
 elasticsearch.log
+elasticsearch.log.azk
+.azk
