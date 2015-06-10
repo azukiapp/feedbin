@@ -21,8 +21,11 @@ systems({
       // Uncomment the line below to use with two-way share (slower)
       //'/azk/#{manifest.dir}': path("."),
       // Run with one-way share rsync (faster)
-      '/azk/#{manifest.dir}': sync("."),
-      '/azk/bundler': persistent("bundler"),
+      '/azk/#{manifest.dir}'        : sync("."),
+      '/azk/bundler'                : persistent("bundler"),
+      '/azk/#{manifest.dir}/tmp'    : persistent("tmp"),
+      '/azk/#{manifest.dir}/.bundle': path(".bundle"),
+      '/azk/#{manifest.dir}/log'    : path("log"),
     },
     scalable: {"default": 1},
     http: {
