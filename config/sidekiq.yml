@@ -1,0 +1,5 @@
+---
+:verbose: false
+:pidfile: /tmp/sidekiq.pid
+:logfile: ./log/sidekiq.log
+# :concurrency:  25
