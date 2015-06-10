@@ -30,6 +30,7 @@ systems({
     },
     envs: {
       // set instances variables
+      RACK_ENV: "development",
       RUBY_ENV: "development",
       BUNDLE_APP_CONFIG: "/azk/bundler",
     },
@@ -45,6 +46,8 @@ systems({
     scalable: { limit: 1, default: 1},
     http: null,
     envs: {
+      RACK_ENV: "development",
+      RUBY_ENV: "development",
       DB_POOL: 12,
       LIBRATO_AUTORUN: 1
     }
@@ -56,6 +59,8 @@ systems({
     scalable: { default: 1,  limit: 1 },
     http: null,
     envs: {
+      RACK_ENV: "development",
+      RUBY_ENV: "development",
       DB_POOL: 1
     }
   },
@@ -65,6 +70,10 @@ systems({
     command: 'bundle exec clockwork lib/clock.rb',
     scalable: { default: 1,  limit: 1 },
     http: null,
+    envs: {
+      RACK_ENV: "development",
+      RUBY_ENV: "development",
+    }
   },
   redis: {
     image: {"docker": "redis"},
@@ -90,15 +99,15 @@ systems({
       data: "5432/tcp",
     },
     envs: {
-      POSTGRESQL_USER: "azk",
-      POSTGRESQL_PASS: "azk",
-      POSTGRESQL_DB: "postgres_development",
+      // set instances variables
+      POSTGRES_USER: "azk",
+      POSTGRES_PASS: "azk",
+      POSTGRES_DB  : "#{manifest.dir}",
     },
     export_envs: {
       // check this gist to configure your database
       // https://gist.github.com/gullitmiranda/62082f2e47c364ef9617
-      POSTGRES_USERNAME: "azk",
-      DATABASE_URL: "postgres://#{envs.POSTGRESQL_USER}:#{envs.POSTGRESQL_PASS}@#{net.host}:#{net.port.data}/${envs.POSTGRESQL_DB}",
+      DATABASE_URL: "postgres://#{envs.POSTGRES_USER}:#{envs.POSTGRES_PASS}@#{net.host}:#{net.port.data}/${envs.POSTGRES_DB}",
     },
   },
   elasticsearch: {
@@ -109,6 +118,7 @@ systems({
     ports: {
       http: "9200",
     },
+    wait: {"retry": 40, "timeout": 1000},
     export_envs : {
       ELASTICSEARCH_URL: "#{system.name}.#{azk.default_domain}:#{net.port[9200]}",
     },

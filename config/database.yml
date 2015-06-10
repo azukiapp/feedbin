@@ -1,13 +1,57 @@
-development: &database
-  adapter: postgresql
-  encoding: unicode
-  database: <%= ENV['POSTGRES_DATABASE'] %>
-  pool: 19
-  username: <%= ENV['POSTGRES_USERNAME'] %>
-  password: <%= ENV['POSTGRES_PASSWORD'] %>
-  host: <%= ENV['POSTGRES_HOST'] %>
-  port: <%= ENV['POSTGRES_PORT'] %>
+<%
+require 'cgi'
+require 'uri'
 
-test:
-  <<: *database
-  database: feedbin_test
+begin
+  uri = URI.parse(ENV["DATABASE_URL"])
+rescue URI::InvalidURIError
+  raise "Invalid DATABASE_URL"
+end
+
+env = ENV["RAILS_ENV"] || ENV["RACK_ENV"]
+
+raise "No RACK_ENV or RAILS_ENV found" unless env
+
+
+def attribute(name, value, force_string = false)
+  if value
+    value_string =
+      if force_string
+        '"' + value + '"'
+      else
+        value
+      end
+    "#{name}: #{value_string}"
+  else
+    ""
+  end
+end
+
+database = "#{(uri.path || "").split("/")[1]}_#{env}"
+username = uri.user
+password = uri.password
+host     = uri.host
+port     = uri.port
+params   = CGI.parse(uri.query || "")
+
+params["encoding"] = ["utf8"] unless params["encoding"].present?
+params["pool"    ] = [5]      unless params["pool"    ].present?
+
+adapter = case uri.scheme.to_s
+          when "postgres" then "postgresql"
+          when "mysql"    then "mysql2"
+          else uri.scheme.to_s
+          end
+%>
+
+<%= env %>:
+  <%= attribute "adapter",  adapter %>
+  <%= attribute "database", database %>
+  <%= attribute "username", username %>
+  <%= attribute "password", password, true %>
+  <%= attribute "host",     host %>
+  <%= attribute "port",     port %>
+
+<% params.each do |key, value| %>
+  <%= key %>: <%= value.first %>
+<% end %>
