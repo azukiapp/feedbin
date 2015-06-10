@@ -10,9 +10,7 @@ systems({
     // More images:  http://images.azk.io
     image: {"docker": "azukiapp/ruby:2.1.4"},
     // Steps to execute before running instances
-    provision: [
-      "bundle install --path /azk/bundler",
-    ],
+    provision: [ ],
     workdir: "/azk/#{manifest.dir}",
     shell: "/bin/bash",
     command: "bundle exec rackup config.ru --pid /tmp/ruby.pid --port $HTTP_PORT --host 0.0.0.0",
@@ -35,7 +33,6 @@ systems({
       // set instances variables
       RACK_ENV: "development",
       RUBY_ENV: "development",
-      BUNDLE_APP_CONFIG: "/azk/bundler",
     },
   },
   worker: {
@@ -52,7 +49,7 @@ systems({
       RACK_ENV: "development",
       RUBY_ENV: "development",
       DB_POOL: 12,
-      LIBRATO_AUTORUN: 1
+      LIBRATO_AUTORUN: 1,
     }
   },
   "worker-slow": {
