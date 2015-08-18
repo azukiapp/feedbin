@@ -1,8 +1,8 @@
-/**
- * Documentation: http://docs.azk.io/Azkfile.js
- */
+/* globals systems path sync persistent */
+/* eslint camelcase: [2, {properties: "never"}] */
+/* eslint comma-dangle: [0, {properties: "never"}] */
 
-// Adds the systems that shape your system
+/* see Azkfile.md */
 systems({
   feedbin: {
     // Dependent systems
@@ -10,7 +10,7 @@ systems({
     // More images:  http://images.azk.io
     image: {"docker": "azukiapp/ruby:2.1.4"},
     // Steps to execute before running instances
-    provision: [ ],
+    provision: [],
     workdir: "/azk/#{manifest.dir}",
     shell: "/bin/bash",
     command: "bundle exec rackup config.ru --pid /tmp/ruby.pid --port $HTTP_PORT --host 0.0.0.0",
@@ -27,7 +27,10 @@ systems({
     },
     scalable: {"default": 1},
     http: {
-      domains: [ "#{system.name}.#{azk.default_domain}" ]
+      domains: [
+        "#{system.name}.#{azk.default_domain}", // default azk
+        "#{process.env.AZK_HOST_IP}"            // used if deployed
+      ]
     },
     envs: {
       // set instances variables
@@ -131,5 +134,44 @@ systems({
     export_envs: {
       MEMCACHED_HOSTS: "#{system.name}.#{azk.default_domain}:#{net.port[11211]}"
     }
-  }
+  },
+
+  deploy: {
+    image: {"docker": "azukiapp/deploy-digitalocean"},
+    mounts: {
+
+      // your files on remote machine
+      // will be on /home/git folder
+      "/azk/deploy/src":  path("."),
+
+      // will use your public key on server
+      // that way you can connect with:
+      // $ ssh git@REMOTE.IP
+      // $ bash
+      "/azk/deploy/.ssh": path("#{process.env.HOME}/.ssh")
+    },
+
+    // this is not a server
+    // just call with azk shell deploy
+    scalable: {"default": 0, "limit": 0},
+
+    envs: {
+      GIT_CHECKOUT_COMMIT_BRANCH_TAG: 'azkfile',
+      AZK_RESTART_COMMAND: 'azk restart -Rvv',
+      RUN_SETUP: 'true',
+      RUN_CONFIGURE: 'true',
+      RUN_DEPLOY: 'true',
+    }
+  },
+  "fast-deploy": {
+    extends: 'deploy',
+    envs: {
+      GIT_CHECKOUT_COMMIT_BRANCH_TAG: 'azkfile',
+      AZK_RESTART_COMMAND: 'azk restart -Rvv',
+      RUN_SETUP: 'false',
+      RUN_CONFIGURE: 'false',
+      RUN_DEPLOY: 'true',
+    }
+  },
+
 });
