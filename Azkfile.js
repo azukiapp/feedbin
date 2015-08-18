@@ -156,6 +156,7 @@ systems({
     scalable: {"default": 0, "limit": 0},
 
     envs: {
+      BOX_SIZE: '2gb',
       GIT_CHECKOUT_COMMIT_BRANCH_TAG: 'azkfile',
       AZK_RESTART_COMMAND: 'azk restart -Rvv',
       RUN_SETUP: 'true',
@@ -166,6 +167,7 @@ systems({
   "fast-deploy": {
     extends: 'deploy',
     envs: {
+      BOX_SIZE: '2gb',
       GIT_CHECKOUT_COMMIT_BRANCH_TAG: 'azkfile',
       AZK_RESTART_COMMAND: 'azk restart -Rvv',
       RUN_SETUP: 'false',
