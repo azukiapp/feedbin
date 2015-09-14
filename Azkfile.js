@@ -8,7 +8,7 @@ systems({
     // Dependent systems
     depends: ["clock", "worker-slow", "worker", "redis", "postgres", "elasticsearch", "memcached"],
     // More images:  http://images.azk.io
-    image: {"docker": "azukiapp/ruby:2.1.4"},
+    image: {"docker": "azukiapp/ruby:2.2"},
     // Steps to execute before running instances
     provision: [],
     workdir: "/azk/#{manifest.dir}",
@@ -46,7 +46,7 @@ systems({
       "bundle exec rake db:setup",
     ],
     depends: ["postgres", "redis", "elasticsearch", "memcached"],
-    command: 'bundle exec sidekiq -c 12 -q critical,2 -q feed_refresher_receiver,1 -q default',
+    command: 'bundle exec sidekiq -c 12 -q critical,3 -q feed_refresher_receiver,2 -q default',
     scalable: { limit: 1, default: 1},
     http: null,
     envs: {
@@ -59,13 +59,13 @@ systems({
   "worker-slow": {
     extends: 'feedbin',
     depends: ["postgres", "redis", "elasticsearch", "memcached"],
-    command: 'bundle exec sidekiq -c 1 -q worker_slow_critical,3 -q worker_slow,2 -q favicon,1',
+    command: 'bundle exec sidekiq -c 2 -q worker_slow_critical,3 -q worker_slow,2 -q favicon,1',
     scalable: { default: 1,  limit: 1 },
     http: null,
     envs: {
       RACK_ENV: "development",
       RUBY_ENV: "development",
-      DB_POOL: 1
+      DB_POOL: 2
     }
   },
   clock: {
@@ -93,7 +93,7 @@ systems({
     // More images:  http://images.azk.io
     image: {"docker": "azukiapp/postgres:9.3"},
     shell: "/bin/bash",
-    wait: {"retry": 20, "timeout": 1000},
+    wait: {"retry": 40, "timeout": 1000},
     mounts: {
       '/var/lib/postgresql': persistent("postgresql"),
       '/var/log/postgresql': path("./log/postgresql"),
@@ -122,7 +122,7 @@ systems({
     ports: {
       http: "9200",
     },
-    wait: {"retry": 40, "timeout": 1000},
+    wait: {"retry": 80, "timeout": 1000},
     export_envs : {
       ELASTICSEARCH_URL: "#{system.name}.#{azk.default_domain}:#{net.port[9200]}",
     },
