@@ -28,9 +28,9 @@ systems({
     scalable: {"default": 1},
     http: {
       domains: [
+        "#{system.name}.#{azk.default_domain}", // default azk domain
         '#{process.env.HOST_DOMAIN}',           // used if deployed
         '#{process.env.HOST_IP}',               // used if deployed
-        "#{system.name}.#{azk.default_domain}", // default azk domain
       ]
     },
     envs: {
