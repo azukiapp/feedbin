@@ -29,8 +29,8 @@ systems({
     http: {
       domains: [
         "#{system.name}.#{azk.default_domain}", // default azk domain
-        '#{process.env.HOST_DOMAIN}',           // used if deployed
-        '#{process.env.HOST_IP}',               // used if deployed
+        '#{env.HOST_DOMAIN}',                   // used if deployed
+        '#{env.HOST_IP}',                       // used if deployed
       ]
     },
     envs: {
@@ -149,7 +149,7 @@ systems({
       // that way you can connect with:
       // $ ssh git@REMOTE.IP
       // $ bash
-      "/azk/deploy/.ssh": path("#{process.env.HOME}/.ssh")
+      "/azk/deploy/.ssh": path("#{env.HOME}/.ssh")
     },
 
     // this is not a server
