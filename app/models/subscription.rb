@@ -1,5 +1,5 @@
 class Subscription < ActiveRecord::Base
-  attr_accessor :entries_count
+  attr_accessor :entries_count, :post_volume
 
   belongs_to :user
   belongs_to :feed, counter_cache: true
@@ -11,7 +11,7 @@ class Subscription < ActiveRecord::Base
   before_destroy :expire_stat_cache
 
   after_create :add_feed_to_action
-  before_destroy :remove_feed_from_action
+  after_commit :remove_feed_from_action, on: [:destroy]
 
   before_destroy :untag
 
@@ -36,17 +36,14 @@ class Subscription < ActiveRecord::Base
   def add_feed_to_action
     actions = Action.where(user_id: self.user_id, all_feeds: true)
     actions.each do |action|
-      unless action.feed_ids.include?(self.feed_id.to_s)
-        action.feed_ids = action.feed_ids + [self.feed_id.to_s]
-        action.save
-      end
+      action.save
     end
   end
 
   def remove_feed_from_action
     actions = Action.where(user_id: self.user_id)
     actions.each do |action|
-      action.feed_ids = action.feed_ids - [self.feed_id.to_s]
+      action.automatic_modification = true
       action.save
     end
   end

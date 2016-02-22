@@ -208,7 +208,9 @@ CREATE TABLE devices (
     model text,
     device_type integer,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    application text,
+    operating_system text
 );
 
 
@@ -448,6 +450,41 @@ ALTER SEQUENCE imports_id_seq OWNED BY imports.id;
 
 
 --
+-- Name: in_app_purchases; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE in_app_purchases (
+    id integer NOT NULL,
+    user_id integer,
+    transaction_id text,
+    purchase_date timestamp without time zone,
+    receipt json,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    response json
+);
+
+
+--
+-- Name: in_app_purchases_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE in_app_purchases_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: in_app_purchases_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE in_app_purchases_id_seq OWNED BY in_app_purchases.id;
+
+
+--
 -- Name: plans; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -599,7 +636,8 @@ CREATE TABLE starred_entries (
     entry_id integer,
     published timestamp without time zone,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    source text
 );
 
 
@@ -658,6 +696,69 @@ CREATE SEQUENCE subscriptions_id_seq
 --
 
 ALTER SEQUENCE subscriptions_id_seq OWNED BY subscriptions.id;
+
+
+--
+-- Name: suggested_categories; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE suggested_categories (
+    id integer NOT NULL,
+    name text,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: suggested_categories_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE suggested_categories_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: suggested_categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE suggested_categories_id_seq OWNED BY suggested_categories.id;
+
+
+--
+-- Name: suggested_feeds; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE suggested_feeds (
+    id integer NOT NULL,
+    suggested_category_id integer,
+    feed_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: suggested_feeds_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE suggested_feeds_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: suggested_feeds_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE suggested_feeds_id_seq OWNED BY suggested_feeds.id;
 
 
 --
@@ -829,7 +930,8 @@ CREATE TABLE users (
     settings hstore,
     starred_token character varying(255),
     inbound_email_token character varying(255),
-    tag_visibility json DEFAULT '{}'::json
+    tag_visibility json DEFAULT '{}'::json,
+    expires_at timestamp without time zone
 );
 
 
@@ -933,6 +1035,13 @@ ALTER TABLE ONLY imports ALTER COLUMN id SET DEFAULT nextval('imports_id_seq'::r
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY in_app_purchases ALTER COLUMN id SET DEFAULT nextval('in_app_purchases_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY plans ALTER COLUMN id SET DEFAULT nextval('plans_id_seq'::regclass);
 
 
@@ -969,6 +1078,20 @@ ALTER TABLE ONLY starred_entries ALTER COLUMN id SET DEFAULT nextval('starred_en
 --
 
 ALTER TABLE ONLY subscriptions ALTER COLUMN id SET DEFAULT nextval('subscriptions_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY suggested_categories ALTER COLUMN id SET DEFAULT nextval('suggested_categories_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY suggested_feeds ALTER COLUMN id SET DEFAULT nextval('suggested_feeds_id_seq'::regclass);
 
 
 --
@@ -1095,6 +1218,14 @@ ALTER TABLE ONLY imports
 
 
 --
+-- Name: in_app_purchases_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY in_app_purchases
+    ADD CONSTRAINT in_app_purchases_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: plans_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1140,6 +1271,22 @@ ALTER TABLE ONLY starred_entries
 
 ALTER TABLE ONLY subscriptions
     ADD CONSTRAINT subscriptions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: suggested_categories_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY suggested_categories
+    ADD CONSTRAINT suggested_categories_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: suggested_feeds_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY suggested_feeds
+    ADD CONSTRAINT suggested_feeds_pkey PRIMARY KEY (id);
 
 
 --
@@ -1295,6 +1442,20 @@ CREATE INDEX index_import_items_on_import_id ON import_items USING btree (import
 
 
 --
+-- Name: index_in_app_purchases_on_transaction_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_in_app_purchases_on_transaction_id ON in_app_purchases USING btree (transaction_id);
+
+
+--
+-- Name: index_in_app_purchases_on_user_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_in_app_purchases_on_user_id ON in_app_purchases USING btree (user_id);
+
+
+--
 -- Name: index_recently_read_entries_on_created_at; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1411,6 +1572,20 @@ CREATE INDEX index_subscriptions_on_user_id ON subscriptions USING btree (user_i
 --
 
 CREATE UNIQUE INDEX index_subscriptions_on_user_id_and_feed_id ON subscriptions USING btree (user_id, feed_id);
+
+
+--
+-- Name: index_suggested_feeds_on_feed_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_suggested_feeds_on_feed_id ON suggested_feeds USING btree (feed_id);
+
+
+--
+-- Name: index_suggested_feeds_on_suggested_category_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_suggested_feeds_on_suggested_category_id ON suggested_feeds USING btree (suggested_category_id);
 
 
 --
@@ -1551,6 +1726,13 @@ CREATE UNIQUE INDEX index_users_on_auth_token ON users USING btree (auth_token);
 --
 
 CREATE UNIQUE INDEX index_users_on_customer_id ON users USING btree (customer_id);
+
+
+--
+-- Name: index_users_on_expires_at; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_users_on_expires_at ON users USING btree (expires_at);
 
 
 --
@@ -1817,4 +1999,18 @@ INSERT INTO schema_migrations (version) VALUES ('20150424224723');
 INSERT INTO schema_migrations (version) VALUES ('20150425060924');
 
 INSERT INTO schema_migrations (version) VALUES ('20150520213553');
+
+INSERT INTO schema_migrations (version) VALUES ('20150602223929');
+
+INSERT INTO schema_migrations (version) VALUES ('20150626223113');
+
+INSERT INTO schema_migrations (version) VALUES ('20150707202540');
+
+INSERT INTO schema_migrations (version) VALUES ('20150713230754');
+
+INSERT INTO schema_migrations (version) VALUES ('20150714000523');
+
+INSERT INTO schema_migrations (version) VALUES ('20150817230441');
+
+INSERT INTO schema_migrations (version) VALUES ('20150827230751');
 

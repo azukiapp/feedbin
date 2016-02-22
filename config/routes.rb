@@ -171,9 +171,15 @@ Feedbin::Application.routes.draw do
           end
         end
 
-        resources :devices,               only: [:create] do
+        resources :devices, only: [:create] do
           collection do
             get :test
+          end
+        end
+
+        resources :users, only: [:create] do
+          collection do
+            get :info
           end
         end
 
@@ -183,6 +189,14 @@ Feedbin::Application.routes.draw do
         resources :taggings,              only: [:index, :show, :create, :destroy]
         resources :entries,               only: [:index, :show]
         resources :recently_read_entries, only: [:index, :create]
+        resources :in_app_purchases,      only: [:create]
+        resources :suggested_categories,  only: [:index]
+        resources :suggested_feeds,       only: [:index] do
+          member do
+            post :subscribe
+            delete :unsubscribe
+          end
+        end
 
         get :authentication, to: 'authentication#index'
 

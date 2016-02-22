@@ -1,13 +1,13 @@
 source 'https://rubygems.org'
-ruby '2.1.4'
+ruby '2.2.3'
 
-gem 'rails'
+gem 'rails', '= 4.1.13'
 gem 'rest-client', '= 1.6.7'
 
 group :development do
   gem 'better_errors'
   gem 'quiet_assets'
-  gem 'capistrano', '~> 2.15.5'
+  gem 'capistrano', github: 'capistrano/capistrano', ref: 'dcd3257'
   gem 'capistrano-unicorn', github: 'sosedoff/capistrano-unicorn', ref: '52376ad', require: false
   gem 'dotenv-rails'
   gem 'silencer'
@@ -70,7 +70,6 @@ gem 'readability_parser'
 gem 'lograge'
 gem 'grocer'
 gem 'cocoon'
-gem 'gctools', require: false
 gem 'connection_pool'
 gem 'httparty'
 gem 'oauth'
@@ -80,7 +79,7 @@ gem 'reverse_markdown'
 gem 'htmlentities'
 
 # Sidekiq
-gem 'sidekiq'
+gem 'sidekiq', '= 3.4.1'
 gem 'sinatra', require: nil
 
 # Stripe
